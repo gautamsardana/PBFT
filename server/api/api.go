@@ -1,12 +1,12 @@
 package api
 
 import (
-	"GolandProjects/pbft/server/config"
+	"GolandProjects/pbft-gautamsardana/server/config"
 	"context"
 	"fmt"
 
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/server/logic"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/server/logic"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

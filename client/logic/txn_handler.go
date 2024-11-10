@@ -1,8 +1,8 @@
 package logic
 
 import (
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/client/config"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/client/config"
 	"context"
 	"fmt"
 )

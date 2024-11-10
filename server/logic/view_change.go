@@ -1,8 +1,8 @@
 package logic
 
 import (
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/server/config"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/server/config"
 	"context"
 	"encoding/json"
 	"errors"

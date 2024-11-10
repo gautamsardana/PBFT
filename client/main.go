@@ -1,15 +1,15 @@
 package main
 
 import (
-	"GolandProjects/pbft/client/logic"
+	"GolandProjects/pbft-gautamsardana/client/logic"
 	"fmt"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/client/api"
-	"GolandProjects/pbft/client/config"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/client/api"
+	"GolandProjects/pbft-gautamsardana/client/config"
 )
 
 func main() {

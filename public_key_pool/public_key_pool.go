@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-const configPath = "/go/src/GolandProjects/pbft/public_key_pool/config.json"
+const configPath = "/go/src/GolandProjects/pbft-gautamsardana/public_key_pool/config.json"
 
 type Config struct {
 	PublicKeys map[string]string `json:"public_keys"`

@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 )
 
 type ServerPool struct {

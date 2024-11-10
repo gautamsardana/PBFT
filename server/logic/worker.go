@@ -1,10 +1,10 @@
 package logic
 
 import (
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/server/config"
-	"GolandProjects/pbft/server/storage"
-	"GolandProjects/pbft/server/storage/datastore"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/server/config"
+	"GolandProjects/pbft-gautamsardana/server/storage"
+	"GolandProjects/pbft-gautamsardana/server/storage/datastore"
 	"context"
 	"fmt"
 )

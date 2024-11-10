@@ -5,9 +5,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/client/config"
-	"GolandProjects/pbft/client/logic"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/client/config"
+	"GolandProjects/pbft-gautamsardana/client/logic"
 )
 
 type Client struct {

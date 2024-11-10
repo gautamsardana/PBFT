@@ -1,7 +1,7 @@
 package logstore
 
 import (
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 )
 
 type LogStore struct {

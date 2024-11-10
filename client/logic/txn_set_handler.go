@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"GolandProjects/pbft/client/config"
+	"GolandProjects/pbft-gautamsardana/client/config"
 	"context"
 	"fmt"
 	"github.com/google/uuid"
@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 )
 
 func ProcessTxnSet(ctx context.Context, conf *config.Config, req *common.TxnSet) error {

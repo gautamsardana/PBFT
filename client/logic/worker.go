@@ -1,12 +1,12 @@
 package logic
 
 import (
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 	"context"
 	"fmt"
 	"time"
 
-	"GolandProjects/pbft/client/config"
+	"GolandProjects/pbft-gautamsardana/client/config"
 )
 
 func ProcessClientTransactions(conf *config.Config, clientQueue *config.ClientQueue) {

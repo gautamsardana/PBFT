@@ -1,7 +1,7 @@
 package config
 
 import (
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 	"crypto/rsa"
 	"crypto/x509"
 	"database/sql"
@@ -15,11 +15,11 @@ import (
 	"sync"
 	"time"
 
-	publicKeyPool "GolandProjects/pbft/public_key_pool"
-	serverPool "GolandProjects/pbft/server_pool"
+	publicKeyPool "GolandProjects/pbft-gautamsardana/public_key_pool"
+	serverPool "GolandProjects/pbft-gautamsardana/server_pool"
 )
 
-const configPath = "/go/src/GolandProjects/pbft/server/config/config.json"
+const configPath = "/go/src/GolandProjects/pbft-gautamsardana/server/config/config.json"
 
 type Config struct {
 	Port                     string `json:"port"`

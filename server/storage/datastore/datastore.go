@@ -1,8 +1,8 @@
 package datastore
 
 import (
-	common "GolandProjects/pbft/api_common"
-	"GolandProjects/pbft/server/storage"
+	common "GolandProjects/pbft-gautamsardana/api_common"
+	"GolandProjects/pbft-gautamsardana/server/storage"
 	"database/sql"
 	"errors"
 	"fmt"

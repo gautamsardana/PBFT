@@ -1,7 +1,7 @@
 package main
 
 import (
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 	"bufio"
 	"encoding/csv"
 	"fmt"

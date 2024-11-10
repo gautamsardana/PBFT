@@ -1,14 +1,14 @@
 package logic
 
 import (
-	"GolandProjects/pbft/server/config"
+	"GolandProjects/pbft-gautamsardana/server/config"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	common "GolandProjects/pbft/api_common"
+	common "GolandProjects/pbft-gautamsardana/api_common"
 )
 
 // When a replica produces a checkpoint, it multicasts a message CHECKPOINT <n,d,i>sig to
