@@ -94,6 +94,11 @@ func ReceiveCommit(ctx context.Context, conf *config.Config, req *common.CommitR
 		return errors.New("server dead")
 	}
 
+	if conf.IsByzantine {
+		fmt.Printf("Server %d: follower is byzantine. Returning...\n", conf.ServerNumber)
+		return errors.New("follower is byzantine")
+	}
+
 	if conf.IsUnderViewChange {
 		return errors.New("server is under view change")
 	}
@@ -181,6 +186,7 @@ func ExecuteTxn(ctx context.Context, conf *config.Config, txnRequest *common.Txn
 	// Signal the worker unconditionally
 	select {
 	case conf.ExecuteSignal <- struct{}{}:
+		fmt.Println("signalled for execution")
 	default:
 		fmt.Println("// Worker already signaled or signal channel is full")
 	}

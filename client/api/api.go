@@ -70,6 +70,15 @@ func (c *Client) PrintDB(ctx context.Context, req *common.PrintDBRequest) (*comm
 	return resp, nil
 }
 
+func (c *Client) PrintStatusClient(ctx context.Context, req *common.PrintStatusRequest) (*common.PrintStatusClientResponse, error) {
+	resp, err := logic.PrintStatus(ctx, req, c.Config)
+	if err != nil {
+		log.Printf("Error printing status: %v", err)
+		return nil, err
+	}
+	return resp, nil
+}
+
 //
 //func (c *Client) Performance(ctx context.Context, req *common.PerformanceRequest) (*common.PerformanceResponse, error) {
 //	resp, err := logic.Performance(ctx, req, c.Config)

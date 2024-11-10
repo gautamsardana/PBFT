@@ -139,8 +139,8 @@ func main() {
 
 		for {
 			fmt.Println("Type 'next' to process the next set, " +
-				"'balance' to get balance, " +
 				"'db' to print database, " +
+				"'status' to get status, " +
 				"'log' to print log," +
 				" or 'perf' to print performance")
 			scanner.Scan()
@@ -152,6 +152,17 @@ func main() {
 				scanner.Scan()
 				server := scanner.Text()
 				printDB(client, server)
+			} else if input == "status" {
+				fmt.Println("Which seq_no? (eg. '1' without quotes)")
+				scanner.Scan()
+				seqNoStr := scanner.Text()
+
+				seqNo, err := strconv.Atoi(seqNoStr)
+				if err != nil {
+					fmt.Println("Invalid input. Please enter a valid integer.")
+					return
+				}
+				printStatus(client, int32(seqNo))
 			} else if input == "log" {
 				fmt.Println("Which user? (eg. 'S1' without quotes)")
 				scanner.Scan()

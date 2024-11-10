@@ -35,9 +35,10 @@ const (
 	PBFT_Sync_FullMethodName              = "/common.PBFT/Sync"
 	PBFT_ViewChange_FullMethodName        = "/common.PBFT/ViewChange"
 	PBFT_NewView_FullMethodName           = "/common.PBFT/NewView"
-	PBFT_PrintStatus_FullMethodName       = "/common.PBFT/PrintStatus"
-	PBFT_PrintDB_FullMethodName           = "/common.PBFT/PrintDB"
 	PBFT_NoOp_FullMethodName              = "/common.PBFT/NoOp"
+	PBFT_PrintStatusClient_FullMethodName = "/common.PBFT/PrintStatusClient"
+	PBFT_PrintStatusServer_FullMethodName = "/common.PBFT/PrintStatusServer"
+	PBFT_PrintDB_FullMethodName           = "/common.PBFT/PrintDB"
 )
 
 // PBFTClient is the client API for PBFT service.
@@ -59,9 +60,10 @@ type PBFTClient interface {
 	Sync(ctx context.Context, in *PBFTCommonRequest, opts ...grpc.CallOption) (*SyncResponse, error)
 	ViewChange(ctx context.Context, in *PBFTCommonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	NewView(ctx context.Context, in *PBFTCommonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	PrintStatus(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusResponse, error)
-	PrintDB(ctx context.Context, in *PrintDBRequest, opts ...grpc.CallOption) (*PrintDBResponse, error)
 	NoOp(ctx context.Context, in *PBFTCommonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	PrintStatusClient(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusClientResponse, error)
+	PrintStatusServer(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusServerResponse, error)
+	PrintDB(ctx context.Context, in *PrintDBRequest, opts ...grpc.CallOption) (*PrintDBResponse, error)
 }
 
 type pBFTClient struct {
@@ -222,10 +224,30 @@ func (c *pBFTClient) NewView(ctx context.Context, in *PBFTCommonRequest, opts ..
 	return out, nil
 }
 
-func (c *pBFTClient) PrintStatus(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusResponse, error) {
+func (c *pBFTClient) NoOp(ctx context.Context, in *PBFTCommonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PrintStatusResponse)
-	err := c.cc.Invoke(ctx, PBFT_PrintStatus_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PBFT_NoOp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pBFTClient) PrintStatusClient(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusClientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PrintStatusClientResponse)
+	err := c.cc.Invoke(ctx, PBFT_PrintStatusClient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pBFTClient) PrintStatusServer(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusServerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PrintStatusServerResponse)
+	err := c.cc.Invoke(ctx, PBFT_PrintStatusServer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -236,16 +258,6 @@ func (c *pBFTClient) PrintDB(ctx context.Context, in *PrintDBRequest, opts ...gr
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PrintDBResponse)
 	err := c.cc.Invoke(ctx, PBFT_PrintDB_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *pBFTClient) NoOp(ctx context.Context, in *PBFTCommonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, PBFT_NoOp_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -271,9 +283,10 @@ type PBFTServer interface {
 	Sync(context.Context, *PBFTCommonRequest) (*SyncResponse, error)
 	ViewChange(context.Context, *PBFTCommonRequest) (*emptypb.Empty, error)
 	NewView(context.Context, *PBFTCommonRequest) (*emptypb.Empty, error)
-	PrintStatus(context.Context, *PrintStatusRequest) (*PrintStatusResponse, error)
-	PrintDB(context.Context, *PrintDBRequest) (*PrintDBResponse, error)
 	NoOp(context.Context, *PBFTCommonRequest) (*emptypb.Empty, error)
+	PrintStatusClient(context.Context, *PrintStatusRequest) (*PrintStatusClientResponse, error)
+	PrintStatusServer(context.Context, *PrintStatusRequest) (*PrintStatusServerResponse, error)
+	PrintDB(context.Context, *PrintDBRequest) (*PrintDBResponse, error)
 	mustEmbedUnimplementedPBFTServer()
 }
 
@@ -329,14 +342,17 @@ func (UnimplementedPBFTServer) ViewChange(context.Context, *PBFTCommonRequest) (
 func (UnimplementedPBFTServer) NewView(context.Context, *PBFTCommonRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewView not implemented")
 }
-func (UnimplementedPBFTServer) PrintStatus(context.Context, *PrintStatusRequest) (*PrintStatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PrintStatus not implemented")
+func (UnimplementedPBFTServer) NoOp(context.Context, *PBFTCommonRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NoOp not implemented")
+}
+func (UnimplementedPBFTServer) PrintStatusClient(context.Context, *PrintStatusRequest) (*PrintStatusClientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrintStatusClient not implemented")
+}
+func (UnimplementedPBFTServer) PrintStatusServer(context.Context, *PrintStatusRequest) (*PrintStatusServerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrintStatusServer not implemented")
 }
 func (UnimplementedPBFTServer) PrintDB(context.Context, *PrintDBRequest) (*PrintDBResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrintDB not implemented")
-}
-func (UnimplementedPBFTServer) NoOp(context.Context, *PBFTCommonRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NoOp not implemented")
 }
 func (UnimplementedPBFTServer) mustEmbedUnimplementedPBFTServer() {}
 func (UnimplementedPBFTServer) testEmbeddedByValue()              {}
@@ -629,20 +645,56 @@ func _PBFT_NewView_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PBFT_PrintStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PBFT_NoOp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PBFTCommonRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PBFTServer).NoOp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PBFT_NoOp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PBFTServer).NoOp(ctx, req.(*PBFTCommonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PBFT_PrintStatusClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PrintStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PBFTServer).PrintStatus(ctx, in)
+		return srv.(PBFTServer).PrintStatusClient(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PBFT_PrintStatus_FullMethodName,
+		FullMethod: PBFT_PrintStatusClient_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PBFTServer).PrintStatus(ctx, req.(*PrintStatusRequest))
+		return srv.(PBFTServer).PrintStatusClient(ctx, req.(*PrintStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PBFT_PrintStatusServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrintStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PBFTServer).PrintStatusServer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PBFT_PrintStatusServer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PBFTServer).PrintStatusServer(ctx, req.(*PrintStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -661,24 +713,6 @@ func _PBFT_PrintDB_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PBFTServer).PrintDB(ctx, req.(*PrintDBRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PBFT_NoOp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PBFTCommonRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PBFTServer).NoOp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PBFT_NoOp_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PBFTServer).NoOp(ctx, req.(*PBFTCommonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -751,16 +785,20 @@ var PBFT_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PBFT_NewView_Handler,
 		},
 		{
-			MethodName: "PrintStatus",
-			Handler:    _PBFT_PrintStatus_Handler,
+			MethodName: "NoOp",
+			Handler:    _PBFT_NoOp_Handler,
+		},
+		{
+			MethodName: "PrintStatusClient",
+			Handler:    _PBFT_PrintStatusClient_Handler,
+		},
+		{
+			MethodName: "PrintStatusServer",
+			Handler:    _PBFT_PrintStatusServer_Handler,
 		},
 		{
 			MethodName: "PrintDB",
 			Handler:    _PBFT_PrintDB_Handler,
-		},
-		{
-			MethodName: "NoOp",
-			Handler:    _PBFT_NoOp_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

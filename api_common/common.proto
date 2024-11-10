@@ -23,9 +23,11 @@ service PBFT {
   rpc Sync(common.PBFTCommonRequest) returns (common.SyncResponse);
   rpc ViewChange(common.PBFTCommonRequest) returns (google.protobuf.Empty);
   rpc NewView(common.PBFTCommonRequest) returns (google.protobuf.Empty);
-  rpc PrintStatus(common.PrintStatusRequest) returns (common.PrintStatusResponse);
-  rpc PrintDB(PrintDBRequest) returns (common.PrintDBResponse);
   rpc NoOp(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+
+  rpc PrintStatusClient(common.PrintStatusRequest) returns (common.PrintStatusClientResponse);
+  rpc PrintStatusServer(common.PrintStatusRequest) returns (common.PrintStatusServerResponse);
+  rpc PrintDB(PrintDBRequest) returns (common.PrintDBResponse);
 }
 
 message TxnSet {
@@ -127,11 +129,16 @@ message NewViewRequest {
   bytes ViewChangeMessages = 2;
   int32 StableSequenceNumber = 3;
 }
+
 message PrintStatusRequest{
-  int32 SequenceNumber = 1;
+  int32 SequenceNumber = 2;
 }
 
-message PrintStatusResponse{
+message PrintStatusClientResponse{
+  map<int32, string> Status = 1;
+}
+
+message PrintStatusServerResponse{
   int32 ServerNo = 1;
   string Status = 2;
 }

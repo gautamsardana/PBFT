@@ -8,13 +8,13 @@ import (
 	"fmt"
 )
 
-func PrintStatus(ctx context.Context, conf *config.Config, req *common.PrintStatusRequest) (*common.PrintStatusResponse, error) {
+func PrintStatus(ctx context.Context, conf *config.Config, req *common.PrintStatusRequest) (*common.PrintStatusServerResponse, error) {
 	dbTxn, err := datastore.GetTransactionBySequenceNo(conf.DataStore, req.SequenceNumber)
 	if err != nil {
-		return nil, err
+		return nil, nil
 	}
 
-	resp := &common.PrintStatusResponse{
+	resp := &common.PrintStatusServerResponse{
 		ServerNo: conf.ServerNumber,
 		Status:   StateToStringMap[dbTxn.Status],
 	}

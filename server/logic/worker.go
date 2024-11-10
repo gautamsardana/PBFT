@@ -11,7 +11,6 @@ import (
 
 func WorkerProcess(conf *config.Config) {
 	for {
-		fmt.Println(conf.ExecuteSignal)
 		<-conf.ExecuteSignal
 		processReadyTransactions(conf)
 	}
@@ -21,7 +20,10 @@ func processReadyTransactions(conf *config.Config) {
 	for {
 		conf.SequenceMutex.Lock()
 		currentSeqNum := conf.NextSequenceNumber
+		fmt.Println(currentSeqNum)
 		conf.SequenceMutex.Unlock()
+
+		fmt.Println(conf.PendingTransactions)
 
 		conf.PendingTransactionsMutex.Lock()
 		txnRequest, exists := conf.PendingTransactions[currentSeqNum]

@@ -68,6 +68,26 @@ func PrintDB(ctx context.Context, req *common.PrintDBRequest, conf *config.Confi
 	return resp, nil
 }
 
+func PrintStatus(ctx context.Context, req *common.PrintStatusRequest, conf *config.Config) (*common.PrintStatusClientResponse, error) {
+	status := make(map[int32]string)
+	for _, serverAddr := range conf.ServerAddresses {
+		server, err := conf.Pool.GetServer(serverAddr)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := server.PrintStatusServer(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		status[resp.ServerNo] = resp.Status
+
+	}
+	finalResp := &common.PrintStatusClientResponse{
+		Status: status,
+	}
+	return finalResp, nil
+}
+
 //
 //func Performance(ctx context.Context, req *common.PerformanceRequest, conf *config.Config) (*common.PerformanceResponse, error) {
 //	serverAddr := mapUserToServer[req.User]

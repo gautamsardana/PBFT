@@ -113,7 +113,7 @@ func (s *Server) NoOp(ctx context.Context, req *common.PBFTCommonRequest) (*empt
 	return nil, err
 }
 
-func (s *Server) PrintStatus(ctx context.Context, req *common.PrintStatusRequest) (*common.PrintStatusResponse, error) {
+func (s *Server) PrintStatusServer(ctx context.Context, req *common.PrintStatusRequest) (*common.PrintStatusServerResponse, error) {
 	resp, err := logic.PrintStatus(ctx, s.Config, req)
 	if err != nil {
 		fmt.Printf("PrintStatus err: %v\n", err)

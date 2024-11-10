@@ -52,6 +52,7 @@ type Config struct {
 	IsUnderViewChange        bool
 	ViewChange               map[int32]ViewChangeStruct
 	HasSentViewChange        map[int32]bool
+	HasSentNewView           map[int32]bool
 	LastViewChangeTime       time.Time
 	ViewChangeTimer          *time.Timer
 	IsAlive                  bool
@@ -106,6 +107,7 @@ func InitiateConfig(conf *Config) {
 	InitiatePendingTxnsLogs(conf)
 	conf.MutexLock.Lock()
 	conf.HasSentViewChange = make(map[int32]bool)
+	conf.HasSentNewView = make(map[int32]bool)
 	conf.ViewChange = make(map[int32]ViewChangeStruct)
 	ResetPBFTLogs(conf)
 	conf.MutexLock.Unlock()

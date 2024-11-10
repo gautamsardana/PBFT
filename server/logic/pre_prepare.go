@@ -91,6 +91,10 @@ func WaitForMajority(ctx context.Context, conf *config.Config, req *common.TxnRe
 
 	select {
 	case <-timer.C:
+		if conf.IsByzantine {
+			fmt.Printf("Server %d: leader is byzantine. Returning\n", conf.ServerNumber)
+			return
+		}
 		logs := conf.PBFTLogs[req.TxnID]
 		if len(logs.PrepareRequests) >= int(2*conf.ServerFaulty) {
 			dbTxn, err := datastore.GetTransactionByTxnID(conf.DataStore, req.TxnID)
@@ -128,7 +132,6 @@ func WaitForMajority(ctx context.Context, conf *config.Config, req *common.TxnRe
 }
 
 func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.PrePrepareRequest) error {
-	//todo: checks for duplicate requests
 	fmt.Printf("Server %d: received pre prepare from leader\n", conf.ServerNumber)
 	if !conf.IsAlive {
 		return errors.New("server dead")
@@ -155,16 +158,28 @@ func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.Pre
 		return err
 	}
 
-	timer := time.NewTimer(10 * time.Second)
 	conf.PBFTLogsMutex.Lock()
-	conf.PBFTLogs[txnReq.TxnID] = config.PBFTLogsInfo{
-		TxnReq:           txnReq,
-		PrePrepareDigest: signedMessage.Digest,
-		Timer:            timer,
-		Done:             make(chan struct{}),
+	logs, exists := conf.PBFTLogs[txnReq.TxnID]
+	if !exists {
+		timer := time.NewTimer(3 * time.Second)
+		conf.PBFTLogs[txnReq.TxnID] = config.PBFTLogsInfo{
+			TxnReq:           txnReq,
+			PrePrepareDigest: signedMessage.Digest,
+			Timer:            timer,
+			Done:             make(chan struct{}),
+		}
+	} else {
+		if logs.Timer != nil && !logs.Timer.Stop() {
+			<-logs.Timer.C
+		}
+		logs.Timer.Reset(3 * time.Second)
+		logs.PrePrepareDigest = signedMessage.Digest
+		conf.PBFTLogs[txnReq.TxnID] = logs
 	}
 
-	go ViewChangeWorker(conf, txnReq)
+	if !conf.IsByzantine {
+		go ViewChangeWorker(conf, txnReq)
+	}
 	conf.PBFTLogsMutex.Unlock()
 
 	dbTxn, err := datastore.GetTransactionByTxnID(conf.DataStore, txnReq.TxnID)
@@ -178,6 +193,11 @@ func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.Pre
 		if err != nil {
 			return err
 		}
+	}
+
+	if conf.IsByzantine {
+		fmt.Printf("Server %d: follower is byzantine. Returning...\n", conf.ServerNumber)
+		return errors.New("follower is byzantine")
 	}
 
 	err = SendPrepare(ctx, conf, req)
@@ -209,6 +229,7 @@ func VerifyPrePrepare(ctx context.Context, conf *config.Config, req *common.PreP
 	}
 
 	if signedMessage.SequenceNumber <= conf.LowWatermark || signedMessage.SequenceNumber > conf.HighWatermark {
+		fmt.Println("potty", signedMessage.SequenceNumber, conf.LowWatermark, conf.HighWatermark)
 		return errors.New("invalid sequence")
 	}
 

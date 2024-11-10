@@ -26,7 +26,7 @@ func ProcessClientTransactions(conf *config.Config, clientQueue *config.ClientQu
 		txn.ResponseChan = make(chan *common.SignedTxnResponse, 7)
 		txn.SuccessCount = 0
 		txn.FailureCount = 0
-		txn.Timer = time.NewTimer(1 * time.Second)
+		txn.Timer = time.NewTimer(4 * time.Second)
 
 		txnReq := &common.TxnRequest{
 			TxnID:      txn.TxnID,

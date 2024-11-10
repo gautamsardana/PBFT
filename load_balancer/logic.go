@@ -27,6 +27,15 @@ func printDB(client common.PBFTClient, server string) {
 	}
 }
 
+func printStatus(client common.PBFTClient, seqNo int32) {
+	resp, err := client.PrintStatusClient(context.Background(), &common.PrintStatusRequest{SequenceNumber: seqNo})
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Printf("Status for this txn is %v:\n", resp.Status)
+}
+
 //
 //func printLogs(client common.PBFTClient, user string) {
 //	resp, err := client.PrintLogs(context.Background(), &common.PrintLogsRequest{User: user})

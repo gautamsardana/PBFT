@@ -9,10 +9,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 )
 
 func SendNewView(conf *config.Config) error {
+	conf.MutexLock.Lock()
+	conf.HasSentNewView[conf.ViewNumber] = true
+	conf.MutexLock.Unlock()
+
 	viewChangeMsgs := conf.ViewChange[conf.ViewNumber].ViewChangeRequests
 	viewChangeMsgBytes, err := json.Marshal(viewChangeMsgs)
 	if err != nil {
@@ -43,8 +48,12 @@ func SendNewView(conf *config.Config) error {
 
 	fmt.Printf("Server %d: sending new view req for view %d\n", conf.ServerNumber, conf.ViewNumber)
 
+	var wg sync.WaitGroup
+
 	for _, serverAddress := range conf.ServerAddresses {
+		wg.Add(1)
 		go func(addr string) {
+			defer wg.Done()
 			server, serverErr := conf.Pool.GetServer(serverAddress)
 			if serverErr != nil {
 				fmt.Println(serverErr)
@@ -56,6 +65,8 @@ func SendNewView(conf *config.Config) error {
 			}
 		}(serverAddress)
 	}
+
+	wg.Wait()
 	conf.MutexLock.Lock()
 	conf.LastViewChangeTime = time.Now()
 	conf.IsUnderViewChange = false
@@ -74,13 +85,14 @@ func ProcessOldViewTxns(conf *config.Config) {
 
 	for _, viewChangeMsg := range viewChangeMsgs {
 		for txnID, pbftLog := range viewChangeMsg.PBFTLogs {
-			if pbftLog.PrepareRequests != nil && len(pbftLog.PrepareRequests) >= int(2*conf.ServerFaulty+1) {
+			if pbftLog.PrepareRequests != nil && len(pbftLog.PrepareRequests) >= int(2*conf.ServerFaulty) {
 				txnMap[txnID] = pbftLog.TxnReq
 				isTxnPrepared[txnID] = true
 				continue
 			} else {
-				txnMap[txnID] = pbftLog.TxnReq
-				isTxnPrepared[txnID] = false
+				if _, exist := txnMap[txnID]; !exist {
+					txnMap[txnID] = pbftLog.TxnReq
+				}
 			}
 		}
 	}
@@ -96,6 +108,13 @@ func ProcessOldViewTxns(conf *config.Config) {
 
 		fmt.Printf("Server %d: processing old txn with seq_no %d\n", conf.ServerNumber, txn.SequenceNo)
 
+		conf.PBFTLogsMutex.Lock()
+		logs := conf.PBFTLogs[txn.TxnID]
+		logs.Timer.Reset(3 * time.Second)
+		conf.PBFTLogs[txn.TxnID] = logs
+		conf.PBFTLogsMutex.Unlock()
+		go ViewChangeWorker(conf, txn)
+
 		if isTxnPrepared[txnID] {
 			err = SendPrePrepare(context.Background(), conf, txn)
 			if err != nil {
@@ -109,7 +128,6 @@ func ProcessOldViewTxns(conf *config.Config) {
 			}
 		}
 	}
-
 }
 
 func ReceiveNewView(ctx context.Context, conf *config.Config, req *common.PBFTCommonRequest) error {

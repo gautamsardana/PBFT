@@ -75,6 +75,11 @@ func CreatePreparedCertificate(conf *config.Config, req *common.TxnRequest) *com
 func ReceivePropose(ctx context.Context, conf *config.Config, req *common.ProposeRequest) error {
 	fmt.Printf("Server %d: received propose from leader\n", conf.ServerNumber)
 
+	if conf.IsByzantine {
+		fmt.Printf("Server %d: follower is byzantine. Returning...\n", conf.ServerNumber)
+		return errors.New("follower is byzantine")
+	}
+
 	if !conf.IsAlive {
 		return errors.New("server dead")
 	}

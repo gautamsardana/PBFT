@@ -43,7 +43,7 @@ func ProcessTxn(ctx context.Context, conf *config.Config, req *common.TxnRequest
 		return errors.New("redirected request to leader")
 	}
 
-	timer := time.NewTimer(10 * time.Second)
+	timer := time.NewTimer(3 * time.Second)
 	conf.PBFTLogsMutex.Lock()
 	conf.PBFTLogs[req.TxnID] = config.PBFTLogsInfo{Timer: timer, TxnReq: req, Done: make(chan struct{})}
 	conf.PBFTLogsMutex.Unlock()
