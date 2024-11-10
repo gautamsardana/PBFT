@@ -49,7 +49,7 @@ type Config struct {
 	PendingTransactions      map[int32]*common.TxnRequest
 	PendingTransactionsMutex sync.Mutex
 	ExecuteSignal            chan struct{}
-	IsUnderViewChange        bool
+	IsUnderViewChange        map[int32]bool
 	ViewChange               map[int32]ViewChangeStruct
 	HasSentViewChange        map[int32]bool
 	HasSentNewView           map[int32]bool
@@ -66,7 +66,6 @@ type PBFTLogsInfo struct {
 	AcceptRequests   []*common.PBFTCommonRequest
 	Timer            *time.Timer   `json:"-"`
 	Done             chan struct{} `json:"-"`
-	Perf             time.Time     `json:"-"`
 }
 
 type ViewChangeStruct struct {
@@ -106,6 +105,7 @@ func InitiateConfig(conf *Config) {
 	InitiatePrivateKey(conf)
 	InitiatePendingTxnsLogs(conf)
 	conf.MutexLock.Lock()
+	conf.IsUnderViewChange = make(map[int32]bool)
 	conf.HasSentViewChange = make(map[int32]bool)
 	conf.HasSentNewView = make(map[int32]bool)
 	conf.ViewChange = make(map[int32]ViewChangeStruct)

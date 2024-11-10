@@ -5,14 +5,19 @@ import (
 	"GolandProjects/pbft-gautamsardana/server/config"
 	"GolandProjects/pbft-gautamsardana/server/storage/datastore"
 	"context"
+	"fmt"
+	"time"
 )
 
 func UpdateServerState(ctx context.Context, conf *config.Config, req *common.UpdateServerStateRequest) error {
+	start := time.Now()
+	datastore.RunDBScript(conf.ServerNumber)
+	fmt.Println(time.Since(start))
+
 	conf.MutexLock.Lock()
 	defer conf.MutexLock.Unlock()
 
-	datastore.RunDBScript(conf.ServerNumber)
-
+	start = time.Now()
 	conf.IsAlive = req.IsAlive
 	conf.IsByzantine = req.IsByzantine
 
@@ -21,7 +26,6 @@ func UpdateServerState(ctx context.Context, conf *config.Config, req *common.Upd
 	conf.NextSequenceNumber = 1
 	conf.LowWatermark = 0
 	conf.HighWatermark = 50
-	conf.IsUnderViewChange = false
 
 	config.InitiateBalance(conf)
 
@@ -39,15 +43,21 @@ func UpdateServerState(ctx context.Context, conf *config.Config, req *common.Upd
 		delete(conf.ViewChange, k)
 	}
 
+	for k := range conf.IsUnderViewChange {
+		delete(conf.IsUnderViewChange, k)
+	}
+
 	for k := range conf.HasSentViewChange {
 		delete(conf.HasSentViewChange, k)
 	}
 
 	for k := range conf.HasSentNewView {
-		delete(conf.HasSentViewChange, k)
+		delete(conf.HasSentNewView, k)
 	}
 
 	conf.CheckpointRequests = conf.CheckpointRequests[:0]
+
+	fmt.Println(time.Since(start))
 
 	return nil
 }

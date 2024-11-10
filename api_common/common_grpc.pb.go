@@ -39,6 +39,7 @@ const (
 	PBFT_PrintStatusClient_FullMethodName = "/common.PBFT/PrintStatusClient"
 	PBFT_PrintStatusServer_FullMethodName = "/common.PBFT/PrintStatusServer"
 	PBFT_PrintDB_FullMethodName           = "/common.PBFT/PrintDB"
+	PBFT_PrintView_FullMethodName         = "/common.PBFT/PrintView"
 )
 
 // PBFTClient is the client API for PBFT service.
@@ -64,6 +65,7 @@ type PBFTClient interface {
 	PrintStatusClient(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusClientResponse, error)
 	PrintStatusServer(ctx context.Context, in *PrintStatusRequest, opts ...grpc.CallOption) (*PrintStatusServerResponse, error)
 	PrintDB(ctx context.Context, in *PrintDBRequest, opts ...grpc.CallOption) (*PrintDBResponse, error)
+	PrintView(ctx context.Context, in *PrintViewRequest, opts ...grpc.CallOption) (*PrintViewResponse, error)
 }
 
 type pBFTClient struct {
@@ -264,6 +266,16 @@ func (c *pBFTClient) PrintDB(ctx context.Context, in *PrintDBRequest, opts ...gr
 	return out, nil
 }
 
+func (c *pBFTClient) PrintView(ctx context.Context, in *PrintViewRequest, opts ...grpc.CallOption) (*PrintViewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PrintViewResponse)
+	err := c.cc.Invoke(ctx, PBFT_PrintView_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PBFTServer is the server API for PBFT service.
 // All implementations must embed UnimplementedPBFTServer
 // for forward compatibility.
@@ -287,6 +299,7 @@ type PBFTServer interface {
 	PrintStatusClient(context.Context, *PrintStatusRequest) (*PrintStatusClientResponse, error)
 	PrintStatusServer(context.Context, *PrintStatusRequest) (*PrintStatusServerResponse, error)
 	PrintDB(context.Context, *PrintDBRequest) (*PrintDBResponse, error)
+	PrintView(context.Context, *PrintViewRequest) (*PrintViewResponse, error)
 	mustEmbedUnimplementedPBFTServer()
 }
 
@@ -353,6 +366,9 @@ func (UnimplementedPBFTServer) PrintStatusServer(context.Context, *PrintStatusRe
 }
 func (UnimplementedPBFTServer) PrintDB(context.Context, *PrintDBRequest) (*PrintDBResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrintDB not implemented")
+}
+func (UnimplementedPBFTServer) PrintView(context.Context, *PrintViewRequest) (*PrintViewResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrintView not implemented")
 }
 func (UnimplementedPBFTServer) mustEmbedUnimplementedPBFTServer() {}
 func (UnimplementedPBFTServer) testEmbeddedByValue()              {}
@@ -717,6 +733,24 @@ func _PBFT_PrintDB_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PBFT_PrintView_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrintViewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PBFTServer).PrintView(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PBFT_PrintView_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PBFTServer).PrintView(ctx, req.(*PrintViewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PBFT_ServiceDesc is the grpc.ServiceDesc for PBFT service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -799,6 +833,10 @@ var PBFT_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PrintDB",
 			Handler:    _PBFT_PrintDB_Handler,
+		},
+		{
+			MethodName: "PrintView",
+			Handler:    _PBFT_PrintView_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

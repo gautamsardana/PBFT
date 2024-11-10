@@ -137,7 +137,7 @@ func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.Pre
 		return errors.New("server dead")
 	}
 
-	if conf.IsUnderViewChange {
+	if conf.IsUnderViewChange[conf.ViewNumber] {
 		return errors.New("server is under view change")
 	}
 
@@ -159,28 +159,22 @@ func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.Pre
 	}
 
 	conf.PBFTLogsMutex.Lock()
-	logs, exists := conf.PBFTLogs[txnReq.TxnID]
-	if !exists {
-		timer := time.NewTimer(3 * time.Second)
-		conf.PBFTLogs[txnReq.TxnID] = config.PBFTLogsInfo{
-			TxnReq:           txnReq,
-			PrePrepareDigest: signedMessage.Digest,
-			Timer:            timer,
-			Done:             make(chan struct{}),
-		}
-	} else {
-		if logs.Timer != nil && !logs.Timer.Stop() {
-			<-logs.Timer.C
-		}
-		logs.Timer.Reset(3 * time.Second)
-		logs.PrePrepareDigest = signedMessage.Digest
-		conf.PBFTLogs[txnReq.TxnID] = logs
+	_, exists := conf.PBFTLogs[txnReq.TxnID]
+	if exists {
+		delete(conf.PBFTLogs, txnReq.TxnID)
 	}
+	timer := time.NewTimer(3 * time.Second)
+	conf.PBFTLogs[txnReq.TxnID] = config.PBFTLogsInfo{
+		TxnReq:           txnReq,
+		PrePrepareDigest: signedMessage.Digest,
+		Timer:            timer,
+		Done:             make(chan struct{}),
+	}
+	conf.PBFTLogsMutex.Unlock()
 
 	if !conf.IsByzantine {
 		go ViewChangeWorker(conf, txnReq)
 	}
-	conf.PBFTLogsMutex.Unlock()
 
 	dbTxn, err := datastore.GetTransactionByTxnID(conf.DataStore, txnReq.TxnID)
 	if err != nil && err != sql.ErrNoRows {
@@ -193,10 +187,16 @@ func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.Pre
 		if err != nil {
 			return err
 		}
+	} else {
+		txnReq.Status = StPrePrepared
+		err = datastore.UpdateTransaction(conf.DataStore, txnReq)
+		if err != nil {
+			return err
+		}
 	}
 
 	if conf.IsByzantine {
-		fmt.Printf("Server %d: follower is byzantine. Returning...\n", conf.ServerNumber)
+		fmt.Printf("Server %d: follower is byzantine. Returning\n", conf.ServerNumber)
 		return errors.New("follower is byzantine")
 	}
 
@@ -229,7 +229,6 @@ func VerifyPrePrepare(ctx context.Context, conf *config.Config, req *common.PreP
 	}
 
 	if signedMessage.SequenceNumber <= conf.LowWatermark || signedMessage.SequenceNumber > conf.HighWatermark {
-		fmt.Println("potty", signedMessage.SequenceNumber, conf.LowWatermark, conf.HighWatermark)
 		return errors.New("invalid sequence")
 	}
 

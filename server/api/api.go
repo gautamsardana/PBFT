@@ -131,6 +131,16 @@ func (s *Server) PrintDB(ctx context.Context, _ *common.PrintDBRequest) (*common
 	return resp, nil
 }
 
+//func (s *Server) PrintView(ctx context.Context, _ *common.PrintViewRequest) (*common.PrintViewResponse, error) {
+//
+//	resp, err := logic.PrintDB(ctx, s.Config)
+//	if err != nil {
+//		fmt.Printf("PrintDB err: %v\n", err)
+//		return nil, err
+//	}
+//	return resp, nil
+//}
+
 //func (s *Server) Sync(ctx context.Context, req *common.PBFTCommonRequest) (*common.SyncResponse, error) {
 //	resp, err := logic.ReceiveSync(ctx, s.Config, req)
 //	if err != nil {

@@ -28,6 +28,7 @@ service PBFT {
   rpc PrintStatusClient(common.PrintStatusRequest) returns (common.PrintStatusClientResponse);
   rpc PrintStatusServer(common.PrintStatusRequest) returns (common.PrintStatusServerResponse);
   rpc PrintDB(PrintDBRequest) returns (common.PrintDBResponse);
+  rpc PrintView(PrintViewRequest) returns (common.PrintViewResponse);
 }
 
 message TxnSet {
@@ -155,4 +156,37 @@ message PrintDBRequest {
 
 message PrintDBResponse {
   repeated ClientBalance ClientBalance = 1;
+}
+
+message PrintViewRequest{
+  int32 ServerNo = 1;
+}
+
+message PrintViewResponse{
+  ViewChangeStruct Resp = 1;
+}
+
+message  PBFTLogsInfo {
+  TxnRequest TxnReq = 1;
+  string PrePrepareDigest = 2;
+  repeated PBFTCommonRequest PrepareRequests = 3;
+  repeated PBFTCommonRequest AcceptRequests = 4;
+}
+
+message ViewChangeSignedRequest {
+  int32 ViewNumber = 1;
+  int32 LastStableCheckpoint = 2;
+  repeated DigestCount CheckpointMessages = 3;
+  map<string, PBFTLogsInfo> PBFTLogs = 4;
+  bytes State = 5;
+  string StateDigest = 6;
+}
+
+message DigestCount{
+  string Digest = 1;
+  int32 Count = 2;
+}
+
+message ViewChangeStruct{
+  repeated ViewChangeSignedRequest ViewChangeRequests = 1;
 }

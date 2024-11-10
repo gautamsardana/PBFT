@@ -69,7 +69,7 @@ func SendNewView(conf *config.Config) error {
 	wg.Wait()
 	conf.MutexLock.Lock()
 	conf.LastViewChangeTime = time.Now()
-	conf.IsUnderViewChange = false
+	conf.IsUnderViewChange[conf.ViewNumber] = false
 	conf.MutexLock.Unlock()
 
 	ProcessOldViewTxns(conf)
@@ -85,6 +85,7 @@ func ProcessOldViewTxns(conf *config.Config) {
 
 	for _, viewChangeMsg := range viewChangeMsgs {
 		for txnID, pbftLog := range viewChangeMsg.PBFTLogs {
+			fmt.Println(txnID, len(pbftLog.PrepareRequests))
 			if pbftLog.PrepareRequests != nil && len(pbftLog.PrepareRequests) >= int(2*conf.ServerFaulty) {
 				txnMap[txnID] = pbftLog.TxnReq
 				isTxnPrepared[txnID] = true
@@ -109,9 +110,17 @@ func ProcessOldViewTxns(conf *config.Config) {
 		fmt.Printf("Server %d: processing old txn with seq_no %d\n", conf.ServerNumber, txn.SequenceNo)
 
 		conf.PBFTLogsMutex.Lock()
-		logs := conf.PBFTLogs[txn.TxnID]
-		logs.Timer.Reset(3 * time.Second)
-		conf.PBFTLogs[txn.TxnID] = logs
+		_, exists := conf.PBFTLogs[txn.TxnID]
+		if exists {
+			delete(conf.PBFTLogs, txn.TxnID)
+		}
+		timer := time.NewTimer(3 * time.Second)
+		conf.PBFTLogs[txn.TxnID] = config.PBFTLogsInfo{
+			TxnReq: txn,
+			Timer:  timer,
+			Done:   make(chan struct{}),
+		}
+
 		conf.PBFTLogsMutex.Unlock()
 		go ViewChangeWorker(conf, txn)
 
@@ -150,7 +159,7 @@ func ReceiveNewView(ctx context.Context, conf *config.Config, req *common.PBFTCo
 	conf.MutexLock.Lock()
 	conf.SequenceNumber = signedReq.StableSequenceNumber
 	conf.ViewNumber = signedReq.NewViewNumber
-	conf.IsUnderViewChange = false
+	conf.IsUnderViewChange[conf.ViewNumber] = false
 	conf.LastViewChangeTime = time.Now()
 	conf.MutexLock.Unlock()
 

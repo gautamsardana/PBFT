@@ -23,8 +23,6 @@ func processReadyTransactions(conf *config.Config) {
 		fmt.Println(currentSeqNum)
 		conf.SequenceMutex.Unlock()
 
-		fmt.Println(conf.PendingTransactions)
-
 		conf.PendingTransactionsMutex.Lock()
 		txnRequest, exists := conf.PendingTransactions[currentSeqNum]
 		conf.PendingTransactionsMutex.Unlock()

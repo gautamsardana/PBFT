@@ -99,7 +99,7 @@ func ReceiveCommit(ctx context.Context, conf *config.Config, req *common.CommitR
 		return errors.New("follower is byzantine")
 	}
 
-	if conf.IsUnderViewChange {
+	if conf.IsUnderViewChange[conf.ViewNumber] {
 		return errors.New("server is under view change")
 	}
 

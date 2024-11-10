@@ -14,6 +14,7 @@ import (
 )
 
 func ProcessTxnSet(ctx context.Context, conf *config.Config, req *common.TxnSet) error {
+	conf.ViewNumber = 1
 	isServerAlive := map[string]bool{
 		"localhost:8080": false,
 		"localhost:8081": false,
@@ -44,6 +45,7 @@ func ProcessTxnSet(ctx context.Context, conf *config.Config, req *common.TxnSet)
 
 	var wg sync.WaitGroup
 
+	start := time.Now()
 	for _, serverAddr := range conf.ServerAddresses {
 		wg.Add(1)
 		go func(addr string) {
@@ -58,8 +60,9 @@ func ProcessTxnSet(ctx context.Context, conf *config.Config, req *common.TxnSet)
 			})
 		}(serverAddr)
 	}
-
 	wg.Wait()
+	fmt.Println(time.Since(start))
+
 	for _, txn := range req.Txns {
 		txnID, err := uuid.NewRandom()
 		if err != nil {

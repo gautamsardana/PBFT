@@ -60,7 +60,7 @@ func ReceiveAccept(ctx context.Context, conf *config.Config, req *common.PBFTCom
 	if !conf.IsAlive {
 		return errors.New("server dead")
 	}
-	if conf.IsUnderViewChange {
+	if conf.IsUnderViewChange[conf.ViewNumber] {
 		return errors.New("server is under view change")
 	}
 

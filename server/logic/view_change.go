@@ -19,18 +19,14 @@ func ViewChangeWorker(conf *config.Config, req *common.TxnRequest) {
 
 	select {
 	case <-log.Timer.C:
-		if conf.ServerNumber == GetLeaderNumber(conf) && conf.IsByzantine {
-			fmt.Printf("Server %d: leader is byzantine. Returning\n", conf.ServerNumber)
-			return
-		}
 		// Check if a view change is already active for the current view number
 		conf.MutexLock.Lock()
-		if conf.IsUnderViewChange {
-			fmt.Printf("Server %d: Timer expired, but already under view change for view number %d\n", conf.ServerNumber, conf.ViewNumber)
-			conf.MutexLock.Unlock()
-			return
-		}
-		if time.Since(conf.LastViewChangeTime) < 3*time.Second {
+		//if conf.IsUnderViewChange[conf.ViewNumber] {
+		//	fmt.Printf("Server %d: Timer expired, but already under view change for view number %d\n", conf.ServerNumber, conf.ViewNumber)
+		//	conf.MutexLock.Unlock()
+		//	return
+		//}
+		if time.Since(conf.LastViewChangeTime) < 2*time.Second {
 			fmt.Printf("Server %d: Timer expired, but recent view change occurred, skipping\n", conf.ServerNumber)
 			conf.MutexLock.Unlock()
 			return
@@ -38,7 +34,7 @@ func ViewChangeWorker(conf *config.Config, req *common.TxnRequest) {
 		conf.MutexLock.Unlock()
 
 		// Start a new view change if not already started
-		SendViewChange(conf)
+		go SendViewChange(conf)
 		return
 	case <-log.Done:
 		fmt.Println("Transaction executed within time, stopping worker for txn:", req.TxnID)
@@ -48,15 +44,17 @@ func ViewChangeWorker(conf *config.Config, req *common.TxnRequest) {
 
 func SendViewChange(conf *config.Config) {
 	conf.MutexLock.Lock()
-	if conf.HasSentViewChange[conf.ViewNumber] {
+
+	if conf.HasSentViewChange[conf.ViewNumber] && time.Since(conf.LastViewChangeTime) < 2*time.Second {
 		fmt.Printf("Server %d: View change already sent for view number %d, skipping\n", conf.ServerNumber, conf.ViewNumber)
 		conf.MutexLock.Unlock()
 		return
 	}
 
-	conf.IsUnderViewChange = true
 	conf.ViewNumber++
-	conf.HasSentViewChange[conf.ViewNumber] = true // Mark view change as sent for this view number
+	conf.IsUnderViewChange[conf.ViewNumber] = true
+	conf.HasSentViewChange[conf.ViewNumber] = true
+	conf.LastViewChangeTime = time.Now()
 
 	fmt.Printf("Server %d: Timer expired, sending view change for view number:%d\n", conf.ServerNumber, conf.ViewNumber)
 
@@ -124,12 +122,12 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 	}
 	fmt.Printf("Server %d: received view change req for view number: %d\n", conf.ServerNumber, signedMessage.ViewNumber)
 
-	if !conf.IsUnderViewChange && conf.ViewNumber == signedMessage.ViewNumber {
+	if !conf.IsUnderViewChange[conf.ViewNumber] && conf.ViewNumber == signedMessage.ViewNumber {
 		return errors.New("view change already happened. Discarding this req")
 	}
 
 	conf.MutexLock.Lock()
-	conf.IsUnderViewChange = true
+	conf.IsUnderViewChange[conf.ViewNumber] = true
 	conf.MutexLock.Unlock()
 
 	err = VerifyViewChange(conf, req)
@@ -161,11 +159,14 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 	conf.MutexLock.Unlock()
 
 	if GetLeaderNumber(conf) != conf.ServerNumber {
+		fmt.Println("not leader or is byzantine")
 		return nil
 	}
 
 	//majority_check
-	if len(conf.ViewChange[conf.ViewNumber].ViewChangeRequests) >= int(2*conf.ServerFaulty+1) {
+	fmt.Println("reached", len(viewChangeLogs.ViewChangeRequests))
+	fmt.Println(conf.HasSentNewView)
+	if len(conf.ViewChange[conf.ViewNumber].ViewChangeRequests) >= int(2*conf.ServerFaulty) {
 		if !conf.HasSentNewView[conf.ViewNumber] {
 			err = SendNewView(conf)
 			if err != nil {
