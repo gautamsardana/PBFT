@@ -164,8 +164,8 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 	}
 
 	//majority_check
-	fmt.Println("reached", len(viewChangeLogs.ViewChangeRequests))
-	fmt.Println(conf.HasSentNewView)
+	//fmt.Println("reached", len(viewChangeLogs.ViewChangeRequests))
+	//fmt.Println(conf.HasSentNewView)
 	if len(conf.ViewChange[conf.ViewNumber].ViewChangeRequests) >= int(2*conf.ServerFaulty) {
 		if !conf.HasSentNewView[conf.ViewNumber] {
 			err = SendNewView(conf)

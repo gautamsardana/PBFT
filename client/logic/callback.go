@@ -26,7 +26,6 @@ func waitForResponses(txn *config.Transaction) bool {
 				txn.FailureCount++
 			}
 
-			// potty_fixed
 			if txn.SuccessCount >= 5 {
 				return true
 			}
