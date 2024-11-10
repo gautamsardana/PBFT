@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fc9d7654-9c07-4bc7-8c36-70cc4aa61938" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/ballot.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/ballot.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/accept.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/accept.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/accepted.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/accepted.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/commit.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/commit.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/prepare.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/prepare.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/promise.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/promise.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/txn_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/txn_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/logic/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/logic/worker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_alice/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_alice/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/ballot.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/ballot.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/accept.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/accept.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/accepted.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/accepted.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/commit.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/commit.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/prepare.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/prepare.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/promise.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/promise.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/txn_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/txn_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/logic/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/logic/worker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_bob/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_bob/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/ballot.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/ballot.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/accept.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/accept.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/accepted.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/accepted.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/commit.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/commit.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/prepare.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/prepare.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/promise.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/promise.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/txn_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/txn_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/logic/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/logic/worker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_chucky/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_chucky/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/ballot.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/ballot.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/accept.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/accept.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/accepted.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/accepted.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/commit.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/commit.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/prepare.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/prepare.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/promise.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/promise.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/txn_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/txn_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/logic/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/logic/worker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_dave/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_dave/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/ballot.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/ballot.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/accept.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/accept.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/accepted.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/accepted.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/commit.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/commit.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/prepare.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/prepare.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/promise.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/promise.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/txn_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/txn_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/logic/worker.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/logic/worker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server_emma/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server_emma/main.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.23.1" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="true" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 6
+}]]></component>
+  <component name="ProjectId" id="2nP8EMf3MdM2noxKBlgXjG3IiG4" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Go Build.go build GolandProjects/apaxos-gautamsardana/client.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/Users/gautamsardana/go/src/GolandProjects/apaxos-gautamsardana/client",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="go build GolandProjects/apaxos-gautamsardana/client" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="client" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="GolandProjects/apaxos-gautamsardana/client" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/main.go" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build GolandProjects/apaxos-gautamsardana/client" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-5df93f7ad4aa-df9ad98b711f-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-242.22855.85" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-GO-242.22855.85" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>false</integration-enabled>
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>

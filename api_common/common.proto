@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+package common;
+
+option go_package = "/";
+
+service PBFT {
+  rpc UpdateServerState(common.UpdateServerStateRequest) returns (google.protobuf.Empty);
+  rpc ProcessTxnSet(common.TxnSet) returns (google.protobuf.Empty);
+  rpc EnqueueTxn(common.TxnRequest) returns (google.protobuf.Empty);
+  rpc ProcessTxn(common.TxnRequest) returns (google.protobuf.Empty);
+  rpc InitiateDKG(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc PrePrepare(common.PrePrepareRequest) returns (google.protobuf.Empty);
+  rpc Prepare(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+  rpc Propose(common.ProposeRequest) returns (google.protobuf.Empty);
+  rpc Accept(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+  rpc Commit(common.CommitRequest) returns (google.protobuf.Empty);
+  rpc Callback(common.TxnResponse) returns (google.protobuf.Empty);
+  rpc Checkpoint(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+  rpc Sync(common.PBFTCommonRequest) returns (common.SyncResponse);
+  rpc ViewChange(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+  rpc NewView(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+  rpc PrintStatus(common.PrintStatusRequest) returns (common.PrintStatusResponse);
+  rpc PrintDB(PrintDBRequest) returns (common.PrintDBResponse);
+  rpc NoOp(common.PBFTCommonRequest) returns (google.protobuf.Empty);
+}
+
+message TxnSet {
+  int32 SetNo = 1;
+  repeated TxnRequest Txns = 2;
+  repeated string LiveServers = 3;
+  repeated string ByzantineServers = 4;
+}
+
+message TxnRequest {
+  string TxnID = 1;
+  string Sender = 2;
+  string Receiver = 3;
+  float Amount = 4;
+  int32 SequenceNo = 5;
+  int32 Status = 6;
+  google.protobuf.Timestamp Timestamp = 7;
+  int32 RetryCount = 8;
+}
+
+message TxnResponse {
+  bytes SignedMessage = 1;
+  bytes Sign = 2;
+  int32 ServerNo = 3;
+}
+
+message SignedTxnResponse{
+  int32 ViewNumber = 1;
+  string TxnID = 2;
+  string Client = 3;
+  string Status = 4;
+}
+message UpdateServerStateRequest{
+  bool IsAlive = 1;
+  bool IsByzantine = 2;
+}
+
+message PBFTCommonRequest{
+  bytes SignedMessage = 1;
+  bytes Sign = 2;
+  bytes Request = 3;
+  int32 ServerNo = 4;
+}
+
+message SignedMessage  {
+  int32 ViewNumber = 1;
+  int32 SequenceNumber = 2 ;
+  string Digest = 3;
+}
+
+message PrePrepareRequest{
+  bytes SignedMessage = 1;
+  bytes Sign = 2;
+  bytes Request = 3;
+  int32 ServerNo = 4;
+}
+
+message Certificate {
+  int32 ViewNumber = 1;
+  int32 SequenceNumber = 2 ;
+  string Digest = 3;
+  repeated PBFTCommonRequest Requests = 4;
+}
+
+message ProposeRequest{
+  bytes PreparedCertificate = 1;
+  bytes Sign = 2;
+  bytes Request = 3;
+  int32 ServerNo = 4;
+}
+
+message CommitRequest{
+  bytes CommitCertificate = 1;
+  bytes Sign = 2;
+  bytes Request = 3;
+  int32 ServerNo = 4;
+}
+
+message SyncSignedMessage{
+  int32 LastSequenceNumberLog = 1;
+  int32 LastSequenceNumberDB = 2;
+}
+
+message SyncTxnDetails{
+  repeated TxnRequest DBTxns = 1;
+  repeated TxnRequest LogTxns = 2;
+  int32 LowWatermark = 3;
+  int32 HighWatermark = 4;
+}
+
+message SyncResponse {
+  bytes SignedMessage = 1;
+  bytes Sign = 2;
+  SyncTxnDetails TxnDetails = 3;
+}
+
+message NewViewRequest {
+  int32 NewViewNumber = 1;
+  bytes ViewChangeMessages = 2;
+  int32 StableSequenceNumber = 3;
+}
+message PrintStatusRequest{
+  int32 SequenceNumber = 1;
+}
+
+message PrintStatusResponse{
+  int32 ServerNo = 1;
+  string Status = 2;
+}
+
+message ClientBalance  {
+  string Client = 1;
+  float  Balance = 2;
+}
+
+
+message PrintDBRequest {
+  string Server = 1;
+}
+
+message PrintDBResponse {
+  repeated ClientBalance ClientBalance = 1;
+}

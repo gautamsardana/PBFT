@@ -1,0 +1,7 @@
+1. Run proto file -
+    protoc --go_out=. --go-grpc_out=. common.proto
+
+Initial thoughts -
+1. How does the client know that the request failed? Should we implement synchronous calls?
+Or we can just have a timer in the client that if we don't get f+1 requests till then, we can mark the
+txn as failed, and move on to the next txn.
