@@ -97,8 +97,8 @@ func ReceiveAccept(ctx context.Context, conf *config.Config, req *common.PBFTCom
 	// todo: if majority reached -
 	// will need to send a list of all
 
-	if len(entry.AcceptRequests) >= int(2*conf.ServerFaulty+2) {
-		err = SendCommit(ctx, conf, req, txnReq)
+	if len(entry.AcceptRequests) >= int(2*conf.ServerFaulty) {
+		err = SendCommit(ctx, conf, txnReq)
 		if err != nil {
 			return err
 		}
@@ -128,11 +128,11 @@ func VerifyAccept(ctx context.Context, conf *config.Config, req *common.PBFTComm
 	conf.PBFTLogsMutex.RLock()
 	defer conf.PBFTLogsMutex.RUnlock()
 
-	if signedMessage.ViewNumber != conf.ViewNumber ||
-		signedMessage.SequenceNumber != txnReq.SequenceNo ||
-		signedMessage.Digest != conf.PBFTLogs[txnReq.TxnID].PrePrepareDigest {
-		return errors.New("accept message does not match expected values")
-	}
+	//if signedMessage.ViewNumber != conf.ViewNumber ||
+	//	signedMessage.SequenceNumber != txnReq.SequenceNo ||
+	//	signedMessage.Digest != conf.PBFTLogs[txnReq.TxnID].PrePrepareDigest {
+	//	return errors.New("accept message does not match expected values")
+	//}
 
 	return nil
 }

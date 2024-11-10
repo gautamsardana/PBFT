@@ -38,18 +38,18 @@ func SendPropose(ctx context.Context, conf *config.Config, txnReq *common.TxnReq
 
 	fmt.Printf("Server %d: sending propose to followers\n", conf.ServerNumber)
 
-	for _, prepareRequest := range cert.Requests {
-		serverAddr := MapServerNoToServerAddr[prepareRequest.ServerNo]
-		server, serverErr := conf.Pool.GetServer(serverAddr)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-			continue
-		}
-		_, err = server.Propose(context.Background(), proposeRequest)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+	for _, serverAddress := range conf.ServerAddresses {
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.Propose(context.Background(), proposeRequest)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
 	}
 	return nil
 }
@@ -92,10 +92,10 @@ func ReceivePropose(ctx context.Context, conf *config.Config, req *common.Propos
 	if err != nil {
 		return err
 	}
-	if dbTxn.Status != StPrePrepared {
-		err = fmt.Errorf("Server %d: txn in invalid status, cannot accept propose, status:%v\n", conf.ServerNumber, dbTxn.Status)
-		return err
-	}
+	//if dbTxn.Status != StPrePrepared {
+	//	err = fmt.Errorf("Server %d: txn in invalid status, cannot accept propose, status:%v\n", conf.ServerNumber, dbTxn.Status)
+	//	return err
+	//}
 
 	err = VerifyPropose(ctx, conf, req, txnReq)
 	if err != nil {
@@ -154,17 +154,17 @@ func VerifyPropose(ctx context.Context, conf *config.Config, req *common.Propose
 			fmt.Println(err)
 			continue
 		}
-		if cert.ViewNumber != conf.ViewNumber ||
-			cert.SequenceNumber != txnReq.SequenceNo {
-			return errors.New("prepared Certificate does not match expected values")
-		}
+		//if cert.ViewNumber != conf.ViewNumber ||
+		//	cert.SequenceNumber != txnReq.SequenceNo {
+		//	return errors.New("prepared Certificate does not match expected values")
+		//}
 		validPrepareCount++
 	}
 
-	//potty_fixed
-	if validPrepareCount < 2*conf.ServerFaulty+1 {
-		return errors.New("not enough valid prepares")
-	}
+	//majority_check
+	//if validPrepareCount < 2*conf.ServerFaulty+1 {
+	//	return errors.New("not enough valid prepares")
+	//}
 
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 )
 
 func ViewChangeWorker(conf *config.Config, req *common.TxnRequest) {
@@ -22,6 +23,11 @@ func ViewChangeWorker(conf *config.Config, req *common.TxnRequest) {
 		conf.MutexLock.Lock()
 		if conf.IsUnderViewChange && conf.HasSentViewChange[conf.ViewNumber] {
 			fmt.Printf("Server %d: Timer expired, but already under view change for view number %d\n", conf.ServerNumber, conf.ViewNumber)
+			conf.MutexLock.Unlock()
+			return
+		}
+		if time.Since(conf.LastViewChangeTime) < 5*time.Second {
+			fmt.Printf("Server %d: Timer expired, but recent view change occurred, skipping\n", conf.ServerNumber)
 			conf.MutexLock.Unlock()
 			return
 		}
@@ -88,16 +94,17 @@ func SendViewChange(conf *config.Config) {
 
 	// Broadcast view change request to other servers
 	for _, serverAddress := range conf.ServerAddresses {
-		server, serverErr := conf.Pool.GetServer(serverAddress)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-			continue
-		}
-		_, err = server.ViewChange(context.Background(), viewChangeReq)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.ViewChange(context.Background(), viewChangeReq)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
 	}
 }
 
@@ -105,9 +112,6 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 	if !conf.IsAlive {
 		return errors.New("server dead")
 	}
-	conf.MutexLock.Lock()
-	conf.IsUnderViewChange = true
-	conf.MutexLock.Unlock()
 
 	signedMessage := &config.ViewChangeSignedRequest{}
 	err := json.Unmarshal(req.SignedMessage, signedMessage)
@@ -115,6 +119,14 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 		return err
 	}
 	fmt.Printf("Server %d: received view change req for view number: %d\n", conf.ServerNumber, signedMessage.ViewNumber)
+
+	if !conf.IsUnderViewChange && conf.ViewNumber == signedMessage.ViewNumber {
+		return errors.New("view change already happened. Discarding this req")
+	}
+
+	conf.MutexLock.Lock()
+	conf.IsUnderViewChange = true
+	conf.MutexLock.Unlock()
 
 	err = VerifyViewChange(conf, req)
 	if err != nil {
@@ -134,7 +146,7 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 		conf.ViewChange[signedMessage.ViewNumber] = viewChangeLogs
 	}
 	conf.MutexLock.Unlock()
-	//potty_fixed
+	//majority_check
 	if len(viewChangeLogs.ViewChangeRequests) >= int(conf.ServerFaulty+1) &&
 		!conf.HasSentViewChange[conf.ViewNumber] {
 		SendViewChange(conf)
@@ -148,7 +160,7 @@ func ReceiveViewChange(ctx context.Context, conf *config.Config, req *common.PBF
 		return nil
 	}
 
-	//potty_fixed
+	//majority_check
 	if len(conf.ViewChange[conf.ViewNumber].ViewChangeRequests) >= int(2*conf.ServerFaulty+1) {
 		err = SendNewView(conf)
 		if err != nil {

@@ -67,18 +67,64 @@ func SendPrePrepare(ctx context.Context, conf *config.Config, req *common.TxnReq
 		return err
 	}
 
-	for _, serverAddress := range conf.ServerAddresses {
-		server, serverErr := conf.Pool.GetServer(serverAddress)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-		}
-		_, err = server.PrePrepare(context.Background(), prePrepareReq)
-		if err != nil {
-			return err
-		}
-	}
+	go WaitForMajority(ctx, conf, req)
 
+	for _, serverAddress := range conf.ServerAddresses {
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.PrePrepare(context.Background(), prePrepareReq)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
+	}
 	return nil
+}
+
+func WaitForMajority(ctx context.Context, conf *config.Config, req *common.TxnRequest) {
+	timer := time.NewTimer(500 * time.Millisecond)
+	defer timer.Stop()
+
+	select {
+	case <-timer.C:
+		logs := conf.PBFTLogs[req.TxnID]
+		if len(logs.PrepareRequests) >= int(2*conf.ServerFaulty) {
+			dbTxn, err := datastore.GetTransactionByTxnID(conf.DataStore, req.TxnID)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			dbTxn.Status = StPrepared
+			err = datastore.UpdateTransaction(conf.DataStore, dbTxn)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			//optimistic
+			if len(logs.PrepareRequests) == int(conf.ServerTotal-1) {
+				fmt.Println("received prepares from all. Proceeding to commit")
+				err = SendCommit(ctx, conf, req)
+				if err != nil {
+					fmt.Println(err)
+				}
+			} else {
+				fmt.Println("received prepares from majority. Proceeding to propose")
+				err = SendPropose(ctx, conf, req)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+		} else {
+			fmt.Println("majority prepares not received. Exiting...")
+		}
+		return
+	}
 }
 
 func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.PrePrepareRequest) error {
@@ -109,7 +155,7 @@ func ReceivePrePrepare(ctx context.Context, conf *config.Config, req *common.Pre
 		return err
 	}
 
-	timer := time.NewTimer(1 * time.Second)
+	timer := time.NewTimer(10 * time.Second)
 	conf.PBFTLogsMutex.Lock()
 	conf.PBFTLogs[txnReq.TxnID] = config.PBFTLogsInfo{
 		TxnReq:           txnReq,

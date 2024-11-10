@@ -6,6 +6,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func Callback(ctx context.Context, conf *config.Config, txn *common.TxnRequest) {
@@ -33,11 +35,13 @@ func Callback(ctx context.Context, conf *config.Config, txn *common.TxnRequest) 
 		ServerNo:      conf.ServerNumber,
 	}
 
-	client, clientErr := conf.Pool.GetServer(GetClientAddress())
-	if clientErr != nil {
-		fmt.Println(clientErr)
+	conn, err := grpc.NewClient(GetClientAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
+	client := common.NewPBFTClient(conn)
+
 	_, err = client.Callback(ctx, finalResp)
 	if err != nil {
 		fmt.Println(err)

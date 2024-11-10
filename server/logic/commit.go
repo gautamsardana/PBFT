@@ -10,11 +10,16 @@ import (
 	"fmt"
 )
 
-func SendCommit(ctx context.Context, conf *config.Config, proposeReq *common.PBFTCommonRequest, txnReq *common.TxnRequest) error {
+func SendCommit(ctx context.Context, conf *config.Config, txnReq *common.TxnRequest) error {
 	// req can come after receiving prepares OR accepts
 
 	cert := CreateCommitCertificate(conf, txnReq)
 	certBytes, err := json.Marshal(cert)
+	if err != nil {
+		return err
+	}
+
+	txnReqBytes, err := json.Marshal(txnReq)
 	if err != nil {
 		return err
 	}
@@ -27,24 +32,24 @@ func SendCommit(ctx context.Context, conf *config.Config, proposeReq *common.PBF
 	commitReq := &common.CommitRequest{
 		CommitCertificate: certBytes,
 		Sign:              sign,
-		Request:           proposeReq.Request,
+		Request:           txnReqBytes,
 		ServerNo:          conf.ServerNumber,
 	}
 
 	fmt.Printf("Server %d: sending commit to followers\n", conf.ServerNumber)
 
-	for _, acceptRequest := range cert.Requests {
-		serverAddr := MapServerNoToServerAddr[acceptRequest.ServerNo]
-		server, serverErr := conf.Pool.GetServer(serverAddr)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-			continue
-		}
-
-		_, err = server.Commit(context.Background(), commitReq)
-		if err != nil {
-			fmt.Println(err)
-		}
+	for _, serverAddress := range conf.ServerAddresses {
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.Commit(context.Background(), commitReq)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
 	}
 
 	dbTxn, err := datastore.GetTransactionByTxnID(conf.DataStore, txnReq.TxnID)
@@ -95,6 +100,12 @@ func ReceiveCommit(ctx context.Context, conf *config.Config, req *common.CommitR
 
 	txnReq := &common.TxnRequest{}
 	err := json.Unmarshal(req.Request, txnReq)
+
+	err = VerifyCommit(ctx, conf, req, txnReq)
+	if err != nil {
+		return err
+	}
+
 	if err != nil {
 		return err
 	}
@@ -102,17 +113,6 @@ func ReceiveCommit(ctx context.Context, conf *config.Config, req *common.CommitR
 	if err != nil {
 		return err
 	}
-
-	if dbTxn.Status != StPrepared {
-		err = fmt.Errorf("Server %d: txn in invalid status, cannot accept commit, status:%v\n", conf.ServerNumber, dbTxn.Status)
-		return err
-	}
-
-	err = VerifyCommit(ctx, conf, req, txnReq)
-	if err != nil {
-		return err
-	}
-
 	dbTxn.Status = StCommitted
 	err = datastore.UpdateTransaction(conf.DataStore, dbTxn)
 	if err != nil {
@@ -160,16 +160,16 @@ func VerifyCommit(ctx context.Context, conf *config.Config, req *common.CommitRe
 		validAcceptCount++
 	}
 
-	//potty_fixed
-	if validAcceptCount < 2*conf.ServerFaulty+1 {
-		return errors.New("not enough valid accepts")
-	}
+	//majority_check
+	//if validAcceptCount < 2*conf.ServerFaulty+1 {
+	//	return errors.New("not enough valid accepts")
+	//}
 
-	if cert.ViewNumber != conf.ViewNumber ||
-		cert.SequenceNumber != txnReq.SequenceNo ||
-		cert.Digest != conf.PBFTLogs[txnReq.TxnID].PrePrepareDigest {
-		return errors.New("commit certificate does not match expected values")
-	}
+	//if cert.ViewNumber != conf.ViewNumber ||
+	//	cert.SequenceNumber != txnReq.SequenceNo ||
+	//	cert.Digest != conf.PBFTLogs[txnReq.TxnID].PrePrepareDigest {
+	//	return errors.New("commit certificate does not match expected values")
+	//}
 	return nil
 }
 

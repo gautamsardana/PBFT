@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
+	"sync"
 	"time"
 
 	common "GolandProjects/pbft-gautamsardana/api_common"
@@ -41,17 +42,24 @@ func ProcessTxnSet(ctx context.Context, conf *config.Config, req *common.TxnSet)
 		isServerByzantine[mapLiveServerToServerAddr[byzantineServer]] = true
 	}
 
+	var wg sync.WaitGroup
+
 	for _, serverAddr := range conf.ServerAddresses {
-		server, err := conf.Pool.GetServer(serverAddr)
-		if err != nil {
-			fmt.Println(err)
-		}
-		_, _ = server.UpdateServerState(ctx, &common.UpdateServerStateRequest{
-			IsAlive:     isServerAlive[serverAddr],
-			IsByzantine: isServerByzantine[serverAddr],
-		})
+		wg.Add(1)
+		go func(addr string) {
+			defer wg.Done()
+			server, err := conf.Pool.GetServer(serverAddr)
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, _ = server.UpdateServerState(ctx, &common.UpdateServerStateRequest{
+				IsAlive:     isServerAlive[serverAddr],
+				IsByzantine: isServerByzantine[serverAddr],
+			})
+		}(serverAddr)
 	}
 
+	wg.Wait()
 	for _, txn := range req.Txns {
 		txnID, err := uuid.NewRandom()
 		if err != nil {

@@ -61,14 +61,17 @@ func SendNoOP(ctx context.Context, conf *config.Config, req *common.TxnRequest) 
 	}
 
 	for _, serverAddress := range conf.ServerAddresses {
-		server, serverErr := conf.Pool.GetServer(serverAddress)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-		}
-		_, err = server.NoOp(context.Background(), noOpReq)
-		if err != nil {
-			return err
-		}
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.NoOp(context.Background(), noOpReq)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
 	}
 	return nil
 }

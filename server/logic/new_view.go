@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 )
 
 func SendNewView(conf *config.Config) error {
@@ -42,17 +43,21 @@ func SendNewView(conf *config.Config) error {
 
 	fmt.Printf("Server %d: sending new view req for view %d\n", conf.ServerNumber, conf.ViewNumber)
 
-	for _, serverAddr := range conf.ServerAddresses {
-		server, serverErr := conf.Pool.GetServer(serverAddr)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-		}
-		_, err = server.NewView(context.Background(), newViewReq)
-		if err != nil {
-			return err
-		}
+	for _, serverAddress := range conf.ServerAddresses {
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.NewView(context.Background(), newViewReq)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
 	}
 	conf.MutexLock.Lock()
+	conf.LastViewChangeTime = time.Now()
 	conf.IsUnderViewChange = false
 	conf.MutexLock.Unlock()
 
@@ -128,6 +133,7 @@ func ReceiveNewView(ctx context.Context, conf *config.Config, req *common.PBFTCo
 	conf.SequenceNumber = signedReq.StableSequenceNumber
 	conf.ViewNumber = signedReq.NewViewNumber
 	conf.IsUnderViewChange = false
+	conf.LastViewChangeTime = time.Now()
 	conf.MutexLock.Unlock()
 
 	return nil
@@ -156,12 +162,11 @@ func VerifyNewView(conf *config.Config, req *common.PBFTCommonRequest) error {
 		return fmt.Errorf("NewViewNumber outdated")
 	}
 
-	// potty_fixed
+	// majority_check
 	if len(signedReq.ViewChangeMessages) < int(2*conf.ServerFaulty+1) {
 		fmt.Printf("Server %d: not enough view change requests for this view number:%d, len = %d\n", conf.ServerNumber, conf.ViewNumber, len(signedReq.ViewChangeMessages))
 		return fmt.Errorf("not enough view change requests for this view number")
 	}
 
-	fmt.Printf("Server %d: got enough view change requests for view number %d\n", conf.ServerNumber, conf.ViewNumber)
 	return nil
 }

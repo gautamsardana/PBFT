@@ -11,6 +11,7 @@ import (
 
 func WorkerProcess(conf *config.Config) {
 	for {
+		fmt.Println(conf.ExecuteSignal)
 		<-conf.ExecuteSignal
 		processReadyTransactions(conf)
 	}
@@ -54,6 +55,7 @@ func executeTransaction(conf *config.Config, txnRequest *common.TxnRequest) {
 		txnRequest.Status = StExecuted
 		conf.Balance[txnRequest.Sender] -= txnRequest.Amount
 		conf.Balance[txnRequest.Receiver] += txnRequest.Amount
+		fmt.Println("\n", txnRequest, conf.Balance, "\n")
 	}
 
 	// Update the transaction in the datastore
@@ -81,9 +83,6 @@ func executeTransaction(conf *config.Config, txnRequest *common.TxnRequest) {
 }
 
 func UpdateBalance(conf *config.Config, txnRequest *common.TxnRequest) error {
-	conf.Balance[txnRequest.Sender] += txnRequest.Amount
-	conf.Balance[txnRequest.Receiver] -= txnRequest.Amount
-
 	err := datastore.UpdateBalance(conf.DataStore, storage.User{
 		User:    txnRequest.Sender,
 		Balance: conf.Balance[txnRequest.Sender],

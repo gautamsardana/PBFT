@@ -70,8 +70,6 @@ type PBFTLogsInfo struct {
 
 type ViewChangeStruct struct {
 	ViewChangeRequests []*ViewChangeSignedRequest
-	ViewChangeMutex    *sync.RWMutex
-	Timer              *time.Timer
 }
 
 type DBCreds struct {

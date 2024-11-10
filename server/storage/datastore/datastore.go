@@ -24,9 +24,9 @@ func GetBalance(db *sql.DB, user string) (float32, error) {
 	return balance, nil
 }
 
-func UpdateBalance(tx *sql.DB, user storage.User) error {
+func UpdateBalance(db *sql.DB, user storage.User) error {
 	query := `UPDATE user SET balance = ? WHERE user = ?`
-	res, err := tx.Exec(query, user.Balance, user.User)
+	res, err := db.Exec(query, user.Balance, user.User)
 	if err != nil {
 		return err
 	}

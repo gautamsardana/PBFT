@@ -58,10 +58,10 @@ func ReceivePrepare(ctx context.Context, conf *config.Config, req *common.PBFTCo
 		return err
 	}
 
-	//potty
-	//if txnReq.SequenceNo == 9 {
-	//	time.Sleep(1 * time.Second)
-	//}
+	err = VerifyPrepare(ctx, conf, req, txnReq)
+	if err != nil {
+		return err
+	}
 
 	conf.PBFTLogsMutex.Lock()
 	entry, exists := conf.PBFTLogs[txnReq.TxnID]
@@ -80,35 +80,6 @@ func ReceivePrepare(ctx context.Context, conf *config.Config, req *common.PBFTCo
 		err = fmt.Errorf("Server %d: txn in invalid status, cannot accept prepare, status:%v\n", conf.ServerNumber, dbTxn.Status)
 		return err
 	}
-
-	err = VerifyPrepare(ctx, conf, req, txnReq)
-	if err != nil {
-		return err
-	}
-
-	// move this to different majority function -
-	//
-	//if majority 2f+1 reached but not from everyone
-
-	if len(entry.PrepareRequests) >= int(2*conf.ServerFaulty+2) {
-		dbTxn.Status = StPrepared
-		err = datastore.UpdateTransaction(conf.DataStore, dbTxn)
-		if err != nil {
-			return err
-		}
-
-		err = SendPropose(ctx, conf, txnReq)
-		if err != nil {
-			return err
-		}
-	}
-
-	/////////
-
-	// if received prepare from everyone
-	//conf.AcceptRequests = conf.PrepareRequests
-	//_ = SendCommit(ctx, conf)
-	//////
 
 	return nil
 }
@@ -129,13 +100,11 @@ func VerifyPrepare(ctx context.Context, conf *config.Config, req *common.PBFTCom
 	if err != nil {
 		return err
 	}
-	if signedMessage.ViewNumber != conf.ViewNumber {
-		return errors.New("invalid view number")
-	}
+
 	conf.PBFTLogsMutex.RLock()
-	if signedMessage.Digest != conf.PBFTLogs[txnReq.TxnID].PrePrepareDigest {
-		return errors.New("invalid digest")
-	}
+	//if signedMessage.Digest != conf.PBFTLogs[txnReq.TxnID].PrePrepareDigest {
+	//	return errors.New("invalid digest")
+	//}
 	conf.PBFTLogsMutex.RUnlock()
 	if signedMessage.SequenceNumber != txnReq.SequenceNo {
 		return errors.New("invalid sequence number")

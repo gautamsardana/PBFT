@@ -56,19 +56,21 @@ func SendCheckpoint(ctx context.Context, conf *config.Config, txnReq *common.Txn
 
 	conf.MutexLock.Unlock()
 	for _, serverAddress := range conf.ServerAddresses {
-		server, serverErr := conf.Pool.GetServer(serverAddress)
-		if serverErr != nil {
-			fmt.Println(serverErr)
-		}
-		_, err = server.Checkpoint(ctx, checkpointReq)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+		go func(addr string) {
+			server, serverErr := conf.Pool.GetServer(serverAddress)
+			if serverErr != nil {
+				fmt.Println(serverErr)
+			}
+			_, err = server.Checkpoint(context.Background(), checkpointReq)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}(serverAddress)
 	}
 	conf.MutexLock.Lock()
 	for index, checkpointRequest := range conf.CheckpointRequests {
-		//potty_fixed
+		//majority_check
 		if checkpointRequest.Count >= 2*conf.ServerFaulty+1 && index == 0 {
 			CheckpointStable(conf, checkpointReq, true)
 		} else if checkpointRequest.Count >= 2*conf.ServerFaulty+1 && index != 0 {
@@ -116,7 +118,7 @@ func ReceiveCheckpoint(ctx context.Context, conf *config.Config, req *common.PBF
 	fmt.Printf("Server %d: received checkpoint request:%v\n", conf.ServerNumber, conf.CheckpointRequests)
 
 	for index, checkpointRequest := range conf.CheckpointRequests {
-		//potty_fixed
+		//majority_check
 		if checkpointRequest.Count >= 2*conf.ServerFaulty+1 && index == 0 {
 			CheckpointStable(conf, req, true)
 		} else if checkpointRequest.Count >= 2*conf.ServerFaulty+1 && index != 0 {
@@ -201,4 +203,5 @@ func CheckpointStable(conf *config.Config, req *common.PBFTCommonRequest, isMajo
 	conf.LowWatermark = signedMessage.SequenceNumber
 	conf.HighWatermark = conf.LowWatermark + conf.K
 	config.ClearPBFTLogsTillSequence(conf, conf.LowWatermark)
+	fmt.Println("checkpoint stable, new lw, hw :%d, %d\n", conf.LowWatermark, conf.HighWatermark)
 }
